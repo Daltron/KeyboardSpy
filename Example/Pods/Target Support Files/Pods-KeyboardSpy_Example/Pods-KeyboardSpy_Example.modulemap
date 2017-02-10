@@ -1,0 +1,6 @@
+framework module Pods_KeyboardSpy_Example {
+  umbrella header "Pods-KeyboardSpy_Example-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,0 +1,7 @@
+use_frameworks!
+
+target 'KeyboardSpy_Example' do
+  pod 'KeyboardSpy', :path => '../'
+  pod 'SnapKit'
+  pod 'Material', '~> 2.0'
+end

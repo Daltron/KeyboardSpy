@@ -1,0 +1,24 @@
+PODS:
+  - KeyboardSpy (0.1.0)
+  - Material (2.4.11):
+    - Material/Core (= 2.4.11)
+  - Material/Core (2.4.11)
+  - SnapKit (3.1.2)
+
+DEPENDENCIES:
+  - KeyboardSpy (from `../`)
+  - Material (~> 2.0)
+  - SnapKit
+
+EXTERNAL SOURCES:
+  KeyboardSpy:
+    :path: ../
+
+SPEC CHECKSUMS:
+  KeyboardSpy: 6162f98e3047f1350ac2b75036fa8025c5faa815
+  Material: 09b50565d8f824bd74881eba12d7c549b41f510d
+  SnapKit: 12b24f569cb7c143acc9c22b9d91b23e7b1c84a2
+
+PODFILE CHECKSUM: 739236577b52ddde503122c640e7da8d72f1f960
+
+COCOAPODS: 1.1.0.rc.3

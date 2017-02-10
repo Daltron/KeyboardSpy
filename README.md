@@ -1,4 +1,4 @@
-![KeyboardSpy](/Users/Dalton/Desktop/keyboard_spy.png)
+![KeyboardSpy](https://raw.githubusercontent.com/Daltron/KeyboardSpy/a81c3e7f86411144dc39c19aa1b72b46f41dd06c/KeyboardSpy/Assets/keyboard_spy.png)
 
 [![Version](https://img.shields.io/cocoapods/v/Spartan.svg?style=flat)](http://cocoapods.org/pods/KeyboardSpy)
 <a href="https://developer.apple.com/swift"><img src="https://img.shields.io/badge/swift-3.0-4BC51D.svg?style=flat" alt="Language: Swift" /></a>

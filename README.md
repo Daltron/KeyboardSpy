@@ -2,8 +2,8 @@
 
 [![Version](https://img.shields.io/cocoapods/v/Spartan.svg?style=flat)](http://cocoapods.org/pods/KeyboardSpy)
 <a href="https://developer.apple.com/swift"><img src="https://img.shields.io/badge/swift-3.0-4BC51D.svg?style=flat" alt="Language: Swift" /></a>
-[![License](https://img.shields.io/cocoapods/l/KeyboardSpy.svg?style=flat)](http://cocoapods.org/pods/KeyboardSpy)
 [![Platform](https://img.shields.io/cocoapods/p/KeyboardSpy.svg?style=flat)](http://cocoapods.org/pods/KeyboardSpy)
+[![License](https://img.shields.io/cocoapods/l/KeyboardSpy.svg?style=flat)](http://cocoapods.org/pods/KeyboardSpy)
 
 ### Written in Swift 3
 

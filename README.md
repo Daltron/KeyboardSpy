@@ -119,4 +119,4 @@ Dalton Hinterscher, daltonhint4@gmail.com
 
 ## License
 
-Spartan is available under the MIT license. See the LICENSE file for more info.
+KeyboardSpy is available under the MIT license. See the LICENSE file for more info.

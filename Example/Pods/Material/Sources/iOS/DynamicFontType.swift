@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,6 @@ open class DynamicFontType: NSObject {
     
     /// Prepares observation for content size changes.
     private func prepareContentSizeObservation() {
-        NotificationCenter.default.addObserver(self, selector: #selector(handleContentSizeChange), name: NSNotification.Name.UIContentSizeCategoryDidChange, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleContentSizeChange), name: .UIContentSizeCategoryDidChange, object: nil)
     }
 }

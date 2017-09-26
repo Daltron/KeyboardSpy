@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 
 import UIKit
 
-private var ToolbarContext: UInt8 = 0
+fileprivate var ToolbarContext: UInt8 = 0
 
 open class Toolbar: Bar {
 	/// A convenience property to set the titleLabel.text.
@@ -95,9 +95,11 @@ open class Toolbar: Bar {
         contentViewAlignment = .center == titleLabel.textAlignment ? .center : .full
     }
     
-    /// Reloads the view.
-    open override func reload() {
-        super.reload()
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        guard willLayout else {
+            return
+        }
         
         if nil != title && "" != title {
             if nil == titleLabel.superview {
@@ -133,17 +135,11 @@ open class Toolbar: Bar {
         }
     }
 
-	/**
-     Prepares the view instance when intialized. When subclassing,
-     it is recommended to override the prepare method
-     to initialize property values and other setup operations.
-     The super.prepare method should always be called immediately
-     when subclassing.
-     */
 	open override func prepare() {
 		super.prepare()
         contentViewAlignment = .center
-		prepareTitleLabel()
+		
+        prepareTitleLabel()
 		prepareDetailLabel()
 	}
 }

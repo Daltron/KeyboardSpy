@@ -1,18 +1,18 @@
 ![KeyboardSpy](https://raw.githubusercontent.com/Daltron/KeyboardSpy/master/KeyboardSpy/Assets/keyboard_spy.png)
 
 [![Version](https://img.shields.io/cocoapods/v/Spartan.svg?style=flat)](http://cocoapods.org/pods/KeyboardSpy)
-<a href="https://developer.apple.com/swift"><img src="https://img.shields.io/badge/swift-3.0-4BC51D.svg?style=flat" alt="Language: Swift" /></a>
+<a href="https://developer.apple.com/swift"><img src="https://img.shields.io/badge/swift-4.0-4BC51D.svg?style=flat" alt="Language: Swift" /></a>
 [![Platform](https://img.shields.io/cocoapods/p/KeyboardSpy.svg?style=flat)](http://cocoapods.org/pods/KeyboardSpy)
 [![License](https://img.shields.io/cocoapods/l/KeyboardSpy.svg?style=flat)](http://cocoapods.org/pods/KeyboardSpy)
 
-### Written in Swift 3
+### Written in Swift 4
 
 KeyboardSpy is a super lightweight and easy to use wrapper that makes observing keyboard notifications in iOS a breeze.
 
 ## Requirements
 
  - iOS 8.0+
- - xCode 8.1+
+ - xCode 9.0+
 
 ## Installation
 
@@ -21,10 +21,6 @@ KeyboardSpy is a super lightweight and easy to use wrapper that makes observing 
 To integrate KeyboardSpy into your xCode project using CocoaPods, specify it in your `Podfile`:
 
 ```ruby
-source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '8.0'
-use_frameworks!
-
 pod 'KeyboardSpy'
 ```
 
@@ -40,7 +36,7 @@ KeyboardSpy uses a protocol based approach to observe keyboard notifications:
 
 ```swift
 public protocol KeyboardSpyAgent {
-    var keyboardEventsToSpyOn: [KeyboardSpyEvent] { get set }
+    var keyboardEventsToSpyOn: [KeyboardSpyEvent] { get }
     func keyboardSpyEventProcessed(event:KeyboardSpyEvent, keyboardInfo: KeyboardSpyInfo)
 }
 ```
@@ -88,9 +84,7 @@ public class KeyboardSpyInfo: NSObject {
 ```swift
 import KeyboardSpy
 
-class KeyboardSpyViewController: UIViewController,  KeyboardSpyAgent {
-
-    internal var keyboardEventsToSpyOn: [KeyboardSpyEvent] = [.willShow, .willHide]
+class KeyboardSpyViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -102,14 +96,22 @@ class KeyboardSpyViewController: UIViewController,  KeyboardSpyAgent {
         KeyboardSpy.unspy(on: keyboardSpyView) // This can be placed anywhere
     }
     
-    func keyboardSpyEventProcessed(event: KeyboardSpyEvent, keyboardInfo: KeyboardSpyInfo) {
+}
+
+extension KeyboardSpyViewController: KeyboardSpyAgent {
+    
+    internal var keyboardEventsToSpyOn: [KeyboardSpyEvent] {
+    	return [.willShow, .willHide]
+    }
+    
+    internal func keyboardSpyEventProcessed(event: KeyboardSpyEvent, keyboardInfo: KeyboardSpyInfo) {
         if event == .willShow {
         	// Do something like moving a view above the keyboard
         } else if event == .willHide {
         	// Do something like moving a view back to its original position
         }   
     }
-    
+
 }
 ```
 

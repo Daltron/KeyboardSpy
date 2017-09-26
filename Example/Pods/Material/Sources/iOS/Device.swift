@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,8 @@
 
 import UIKit
 
-public enum DeviceModel {
+@objc(DeviceModel)
+public enum DeviceModel: Int {
     case iPodTouch5
     case iPodTouch6
     case iPhone4
@@ -116,3 +117,13 @@ public struct Device {
 		return UIDevice.current.userInterfaceIdiom
 	}
 }
+
+
+public func ==(lhs: DeviceModel, rhs: DeviceModel) -> Bool {
+    return lhs.rawValue == rhs.rawValue
+}
+
+public func !=(lhs: DeviceModel, rhs: DeviceModel) -> Bool {
+    return lhs.rawValue != rhs.rawValue
+}
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -198,21 +198,14 @@ open class Card: PulseView {
         }
         
         container.height = h
-        height = h
+        bounds.size.height = h
     }
     
-    /**
-     Prepares the view instance when intialized. When subclassing,
-     it is recommended to override the prepare method
-     to initialize property values and other setup operations.
-     The super.prepare method should always be called immediately
-     when subclassing.
-     */
     open override func prepare() {
         super.prepare()
-        depthPreset = .depth1
         pulseAnimation = .none
         cornerRadiusPreset = .cornerRadius1
+        
         prepareContainer()
     }
     
@@ -233,9 +226,9 @@ open class Card: PulseView {
         let w = container.width - insets.left - insets.right
         var h = view.height
         
-        if 0 == h {
+        if 0 == h || nil != view as? UILabel {
             (view as? UILabel)?.sizeToFit()
-            h = view.sizeThatFits(CGSize(width: w, height: CGFloat.greatestFiniteMagnitude)).height
+            h = view.sizeThatFits(CGSize(width: w, height: .greatestFiniteMagnitude)).height
         }
         
         view.width = w
@@ -255,9 +248,11 @@ open class Card: PulseView {
         self.contentView = contentView
         self.bottomBar = bottomBar
     }
-    
+}
+
+extension Card {
     /// Prepares the container.
-    private func prepareContainer() {
+    fileprivate func prepareContainer() {
         container.clipsToBounds = true
         addSubview(container)
     }

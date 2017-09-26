@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,6 +99,15 @@ open class CollectionView: UICollectionView {
 		super.init(frame: frame, collectionViewLayout: layout)
 		prepare()
 	}
+    
+    /**
+     An initializer that initializes the object.
+     - Parameter collectionViewLayout: A UICollectionViewLayout reference.
+     */
+    public init(collectionViewLayout layout: UICollectionViewLayout) {
+        super.init(frame: .zero, collectionViewLayout: layout)
+        prepare()
+    }
 	
 	/**
      An initializer that initializes the object.
@@ -106,12 +115,13 @@ open class CollectionView: UICollectionView {
      */
 	public init(frame: CGRect) {
 		super.init(frame: frame, collectionViewLayout: CollectionViewLayout())
-		prepare()
-	}
+        prepare()
+    }
 	
 	/// A convenience initializer that initializes the object.
-	public convenience init() {
-		self.init(frame: .zero)
+	public init() {
+        super.init(frame: .zero, collectionViewLayout: CollectionViewLayout())
+        prepare()
 	}
 	
 	/**
@@ -121,8 +131,9 @@ open class CollectionView: UICollectionView {
      The super.prepare method should always be called immediately
      when subclassing.
      */
-	open func prepare() {
+    open func prepare() {
+        backgroundColor = .white
 		contentScaleFactor = Screen.scale
-		backgroundColor = .white
+        register(CollectionViewCell.self, forCellWithReuseIdentifier: "CollectionViewCell")
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,13 +30,18 @@
 
 import UIKit
 
-@objc(ToolbarAlignment)
-public enum ToolbarAlignment: Int {
-    case top
-    case bottom
-}
-
 open class ImageCard: Card {
+    /**
+     A Display value to indicate whether or not to
+     display the imageView to the full view
+     bounds.
+     */
+    open var displayStyle = DisplayStyle.partial {
+        didSet {
+            layoutSubviews()
+        }
+    }
+    
     /// A preset wrapper around imageViewEdgeInsets.
     open var imageViewEdgeInsetsPreset = EdgeInsetsPreset.none {
         didSet {
@@ -71,6 +76,7 @@ open class ImageCard: Card {
         }
     }
     
+    /// Reloads the view.
     open override func reload() {
         var h: CGFloat = 0
         
@@ -94,6 +100,6 @@ open class ImageCard: Card {
         }
         
         container.height = h
-        height = h
+        bounds.size.height = h
     }
 }

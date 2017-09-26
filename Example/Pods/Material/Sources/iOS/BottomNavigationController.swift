@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,39 +30,25 @@
 
 import UIKit
 
-public class BottomNavigationFadeAnimatedTransitioning: NSObject, UIViewControllerAnimatedTransitioning {
-	public func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-		let fromView : UIView = transitionContext.view(forKey: UITransitionContextViewKey.from)!
-		let toView : UIView = transitionContext.view(forKey: UITransitionContextViewKey.to)!
-		toView.alpha = 0
-		
-		transitionContext.containerView.addSubview(fromView)
-		transitionContext.containerView.addSubview(toView)
-		
-		UIView.animate(withDuration: transitionDuration(using: transitionContext),
-			animations: { _ in
-				toView.alpha = 1
-				fromView.alpha = 0
-			}) { _ in
-				transitionContext.completeTransition(true)
-			}
-	}
-	
-	public func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-		return 0.35
-	}
+extension UIViewController {
+    /**
+     A convenience property that provides access to the BottomNavigationController.
+     This is the recommended method of accessing the BottomNavigationController
+     through child UIViewControllers.
+     */
+    public var bottomNavigationController: BottomNavigationController? {
+        var viewController: UIViewController? = self
+        while nil != viewController {
+            if viewController is BottomNavigationController {
+                return viewController as? BottomNavigationController
+            }
+            viewController = viewController?.parent
+        }
+        return nil
+    }
 }
 
-@objc(BottomNavigationTransitionAnimation)
-public enum BottomNavigationTransitionAnimation: Int {
-	case none
-	case fade
-}
-
-open class BottomNavigationController: UITabBarController, UITabBarControllerDelegate {
-	/// The transition animation to use when selecting a new tab.
-	open var transitionAnimation = BottomNavigationTransitionAnimation.fade
-	
+open class BottomNavigationController: UITabBarController {
 	/**
      An initializer that initializes the object with a NSCoder object.
      - Parameter aDecoder: A NSCoder instance.
@@ -104,7 +90,12 @@ open class BottomNavigationController: UITabBarController, UITabBarControllerDel
 		layoutSubviews()
 	}
 	
-	open func layoutSubviews() {
+    /**
+     To execute in the order of the layout chain, override this
+     method. `layoutSubviews` should be called immediately, unless you
+     have a certain need.
+     */
+    open func layoutSubviews() {
 		if let v = tabBar.items {
 			for item in v {
 				if .phone == Device.userInterfaceIdiom {
@@ -128,7 +119,7 @@ open class BottomNavigationController: UITabBarController, UITabBarControllerDel
 			}
 		}
         
-        tabBar.divider.reload()
+        tabBar.layoutDivider()
 	}
 	
 	/**
@@ -138,32 +129,26 @@ open class BottomNavigationController: UITabBarController, UITabBarControllerDel
      The super.prepare method should always be called immediately
      when subclassing.
      */
-	open func prepare() {
-		view.clipsToBounds = true
-		view.contentScaleFactor = Screen.scale
-		view.backgroundColor = .white
-        delegate = self
+    open func prepare() {
+        view.clipsToBounds = true
+        view.backgroundColor = .white
+        view.contentScaleFactor = Screen.scale
+        
         prepareTabBar()
 	}
-	
-	/// Handles transitions when tabBarItems are pressed.
-	open func tabBarController(_ tabBarController: UITabBarController, animationControllerForTransitionFrom fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-		let fVC: UIViewController? = fromVC
-		let tVC: UIViewController? = toVC
-		if nil == fVC || nil == tVC {
-			return nil
-		}
-		return .fade == transitionAnimation ? BottomNavigationFadeAnimatedTransitioning() : nil
-	}
-	
-	/// Prepares the tabBar.
-	private func prepareTabBar() {
-		tabBar.heightPreset = .normal
-        tabBar.depthPreset = .depth1
+}
+
+fileprivate extension BottomNavigationController {
+    /// Prepares the tabBar.
+    func prepareTabBar() {
+        tabBar.isTranslucent = false
+        tabBar.heightPreset = .normal
+        tabBar.dividerColor = Color.grey.lighten2
         tabBar.dividerAlignment = .top
-        let image = UIImage.image(with: Color.clear, size: CGSize(width: 1, height: 1))
-		tabBar.shadowImage = image
-		tabBar.backgroundImage = image
-		tabBar.backgroundColor = .white
-	}
+        
+        let image = UIImage()
+        tabBar.shadowImage = image
+        tabBar.backgroundImage = image
+        tabBar.backgroundColor = .white
+    }
 }

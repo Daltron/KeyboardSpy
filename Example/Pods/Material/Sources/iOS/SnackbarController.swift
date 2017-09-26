@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,18 +78,11 @@ extension UIViewController {
      through child UIViewControllers.
      */
     public var snackbarController: SnackbarController? {
-        var viewController: UIViewController? = self
-        while nil != viewController {
-            if viewController is SnackbarController {
-                return viewController as? SnackbarController
-            }
-            viewController = viewController?.parent
-        }
-        return nil
+        return traverseViewControllerHierarchyForClassType()
     }
 }
 
-open class SnackbarController: RootController {
+open class SnackbarController: TransitionController {
     /// Reference to the Snackbar.
     open let snackbar = Snackbar()
     
@@ -123,7 +116,7 @@ open class SnackbarController: RootController {
      */
     @discardableResult
     open func animate(snackbar status: SnackbarStatus, delay: TimeInterval = 0, animations: ((Snackbar) -> Void)? = nil, completion: ((Snackbar) -> Void)? = nil) -> MotionDelayCancelBlock? {
-        return Motion.delay(time: delay) { [weak self, status = status, animations = animations, completion = completion] in
+        return Motion.delay(delay) { [weak self, status = status, animations = animations, completion = completion] in
             guard let s = self else {
                 return
             }
@@ -188,13 +181,6 @@ open class SnackbarController: RootController {
         layoutSnackbar(status: snackbar.status)
     }
     
-    /**
-     Prepares the view instance when intialized. When subclassing,
-     it is recommended to override the prepare method
-     to initialize property values and other setup operations.
-     The super.prepare method should always be called immediately
-     when subclassing.
-     */
     open override func prepare() {
         super.prepare()
         prepareSnackbar()

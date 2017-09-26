@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ public enum ContentViewAlignment: Int {
 open class Bar: View {
     /// Will layout the view.
     open var willLayout: Bool {
-        return 0 < width && 0 < height && nil != superview
+        return 0 < width && 0 < height && nil != superview && !grid.deferred
     }
     
     open override var intrinsicContentSize: CGSize {
@@ -183,15 +183,6 @@ open class Bar: View {
             return
         }
         
-        guard !grid.deferred else {
-            return
-        }
-        
-        reload()
-    }
-    
-    /// Reloads the view.
-    open func reload() {
         var lc = 0
         var rc = 0
         
@@ -265,21 +256,23 @@ open class Bar: View {
         grid.commit()
         contentView.grid.commit()
         
-        divider.reload()
+        layoutDivider()
     }
     
-    /**
-     Prepares the view instance when intialized. When subclassing,
-     it is recommended to override the prepare method
-     to initialize property values and other setup operations.
-     The super.prepare method should always be called immediately
-     when subclassing.
-     */
     open override func prepare() {
         super.prepare()
         heightPreset = .normal
         autoresizingMask = .flexibleWidth
         interimSpacePreset = .interimSpace3
         contentEdgeInsetsPreset = .square1
+        
+        prepareContentView()
+    }
+}
+
+extension Bar {
+    /// Prepares the contentView.
+    fileprivate func prepareContentView() {
+        contentView.contentScaleFactor = Screen.scale
     }
 }

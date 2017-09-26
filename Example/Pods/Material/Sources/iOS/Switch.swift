@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -166,7 +166,7 @@ open class Switch: UIControl {
     }
     
     /// Button view reference.
-    open fileprivate(set) var button: FabButton {
+    open fileprivate(set) var button: FABButton {
         didSet {
             prepareButton()
         }
@@ -208,15 +208,15 @@ open class Switch: UIControl {
                 buttonOnColor = Color.blue.darken2
                 trackOnColor = Color.blue.lighten3
                 buttonOffColor = Color.blueGrey.lighten4
-                trackOffColor = Color.grey.lighten3
+                trackOffColor = Color.grey.lighten2
                 buttonOnDisabledColor = Color.grey.lighten2
-                trackOnDisabledColor = Color.grey.lighten3
+                trackOnDisabledColor = Color.grey.lighten2
                 buttonOffDisabledColor = Color.grey.lighten2
-                trackOffDisabledColor = Color.grey.lighten3
+                trackOffDisabledColor = Color.grey.lighten2
             case .dark:
                 buttonOnColor = Color.blue.lighten1
                 trackOnColor = Color.blue.lighten2.withAlphaComponent(0.5)
-                buttonOffColor = Color.grey.lighten3
+                buttonOffColor = Color.grey.lighten2
                 trackOffColor = Color.blueGrey.lighten4.withAlphaComponent(0.5)
                 buttonOnDisabledColor = Color.grey.darken3
                 trackOnDisabledColor = Color.grey.lighten1.withAlphaComponent(0.2)
@@ -262,7 +262,7 @@ open class Switch: UIControl {
      */
     public required init?(coder aDecoder: NSCoder) {
         track = UIView()
-        button = FabButton()
+        button = FABButton()
         super.init(coder: aDecoder)
         prepare()
     }
@@ -276,7 +276,7 @@ open class Switch: UIControl {
      */
     public override init(frame: CGRect) {
         track = UIView()
-        button = FabButton()
+        button = FABButton()
         super.init(frame: frame)
         prepare()
     }
@@ -289,7 +289,7 @@ open class Switch: UIControl {
      */
     public init(state: SwitchState = .off, style: SwitchStyle = .dark, size: SwitchSize = .medium) {
         track = UIView()
-        button = FabButton()
+        button = FABButton()
         super.init(frame: .zero)
         prepare()
         prepareSwitchState(state: state)
@@ -388,7 +388,7 @@ extension Switch {
         internalSwitchState = state
         
         if animated {
-            animateToState(state: state) { [weak self] _ in
+            animateToState(state: state) { [weak self, isTriggeredByUserInteraction = isTriggeredByUserInteraction] _ in
                 guard isTriggeredByUserInteraction else {
                     return
                 }
@@ -467,23 +467,23 @@ extension Switch {
     fileprivate func animateToState(state: SwitchState, completion: ((Switch) -> Void)? = nil) {
         isUserInteractionEnabled = false
         UIView.animate(withDuration: 0.15,
-                       delay: 0.05,
-                       options: [.curveEaseIn, .curveEaseOut],
-                       animations: { [weak self] in
-                        guard let s = self else {
-                            return
-                        }
-                        
-                        s.button.x = .on == state ? s.onPosition + s.bounceOffset : s.offPosition - s.bounceOffset
-                        s.styleForState(state: state)
+            delay: 0.05,
+            options: [.curveEaseIn, .curveEaseOut],
+            animations: { [weak self] in
+                guard let s = self else {
+                    return
+                }
+                
+                s.button.x = .on == state ? s.onPosition + s.bounceOffset : s.offPosition - s.bounceOffset
+                s.styleForState(state: state)
         }) { [weak self] _ in
             UIView.animate(withDuration: 0.15,
-                           animations: { [weak self] in
-                            guard let s = self else {
-                                return
-                            }
-                            
-                            s.button.x = .on == state ? s.onPosition : s.offPosition
+                animations: { [weak self] in
+                    guard let s = self else {
+                        return
+                    }
+                    
+                    s.button.x = .on == state ? s.onPosition : s.offPosition
             }) { [weak self] _ in
                 guard let s = self else {
                     return
@@ -498,12 +498,12 @@ extension Switch {
 
 extension Switch {
     /**
-     Handle the TouchUpOutside and TouchCancel events.
+     Handle the TouchUpOutside and TouchCancel moments.
      - Parameter sender: A UIButton.
      - Parameter event: A UIEvent.
      */
     @objc
-    fileprivate func handleTouchUpOutsideOrCanceled(sender: FabButton, event: UIEvent) {
+    fileprivate func handleTouchUpOutsideOrCanceled(sender: FABButton, event: UIEvent) {
         guard let v = event.touches(for: sender)?.first else {
             return
         }
@@ -524,7 +524,7 @@ extension Switch {
      - Parameter event: A UIEvent.
      */
     @objc
-    fileprivate func handleTouchDragInside(sender: FabButton, event: UIEvent) {
+    fileprivate func handleTouchDragInside(sender: FABButton, event: UIEvent) {
         guard let v = event.touches(for: sender)?.first else {
             return
         }

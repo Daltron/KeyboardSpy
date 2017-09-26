@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,30 +42,30 @@ public enum BorderWidthPreset: Int {
 	case border7
 	case border8
 	case border9
-}
-
-/// Converts the BorderWidthPreset enum to a CGFloat value.
-public func BorderWidthPresetToValue(preset: BorderWidthPreset) -> CGFloat {
-	switch preset {
-	case .none:
-		return 0
-	case .border1:
-		return 0.5
-	case .border2:
-		return 1
-	case .border3:
-		return 2
-	case .border4:
-		return 3
-	case .border5:
-		return 4
-	case .border6:
-		return 5
-	case .border7:
-		return 6
-	case .border8:
-		return 7
-	case .border9:
-		return 8
-	}
+    
+    /// A CGFloat representation of the border width preset.
+    public var cgFloatValue: CGFloat {
+        switch self {
+        case .none:
+            return 0
+        case .border1:
+            return 0.5
+        case .border2:
+            return 1
+        case .border3:
+            return 2
+        case .border4:
+            return 3
+        case .border5:
+            return 4
+        case .border6:
+            return 5
+        case .border7:
+            return 6
+        case .border8:
+            return 7
+        case .border9:
+            return 8
+        }
+    }
 }

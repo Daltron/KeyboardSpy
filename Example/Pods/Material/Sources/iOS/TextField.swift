@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,27 +40,27 @@ public enum TextFieldPlaceholderAnimation: Int {
 public protocol TextFieldDelegate: UITextFieldDelegate {
     /**
      A delegation method that is executed when the textField changed.
-     - Parameter textField: A UITextField.
+     - Parameter textField: A TextField.
      - Parameter didChange text: An optional String.
      */
     @objc
-    optional func textField(textField: UITextField, didChange text: String?)
+    optional func textField(textField: TextField, didChange text: String?)
 
     /**
      A delegation method that is executed when the textField will clear.
-     - Parameter textField: A UITextField.
+     - Parameter textField: A TextField.
      - Parameter willClear text: An optional String.
      */
     @objc
-    optional func textField(textField: UITextField, willClear text: String?)
+    optional func textField(textField: TextField, willClear text: String?)
     
     /**
      A delegation method that is executed when the textField is cleared.
-     - Parameter textField: A UITextField.
+     - Parameter textField: A TextField.
      - Parameter didClear text: An optional String.
      */
     @objc
-    optional func textField(textField: UITextField, didClear text: String?)
+    optional func textField(textField: TextField, didClear text: String?)
 }
 
 open class TextField: UITextField {
@@ -76,13 +76,24 @@ open class TextField: UITextField {
     /// Set the placeholder animation value.
     open var placeholderAnimation = TextFieldPlaceholderAnimation.default {
         didSet {
-            placeholderLabel.isHidden = .hidden == placeholderAnimation && !isEmpty
+            guard isEditing else {
+                placeholderLabel.isHidden = !isEmpty && .hidden == placeholderAnimation
+                return
+            }
+            
+            placeholderLabel.isHidden = .hidden == placeholderAnimation
         }
     }
     
     /// A boolean indicating whether the text is empty.
     open var isEmpty: Bool {
         return 0 == text?.utf16.count
+    }
+    
+    open override var text: String? {
+        didSet {
+            placeholderAnimation = { placeholderAnimation }()
+        }
     }
     
     open override var leftView: UIView? {
@@ -101,7 +112,7 @@ open class TextField: UITextField {
         return leftViewOffset + height
     }
     
-    /// The leftView width value.
+    /// The leftView offset value.
     open var leftViewOffset: CGFloat = 16
     
     /// Placeholder normal text
@@ -133,8 +144,8 @@ open class TextField: UITextField {
     }
     
     
-	/// Divider active height.
-	@IBInspectable
+    /// Divider active height.
+    @IBInspectable
     open var dividerActiveHeight: CGFloat = 2 {
         didSet {
             guard isEditing else {
@@ -144,10 +155,10 @@ open class TextField: UITextField {
             dividerThickness = dividerActiveHeight
         }
     }
-	
-	/// Divider normal color.
-	@IBInspectable
-    open var dividerNormalColor = Color.darkText.dividers {
+    
+    /// Divider normal color.
+    @IBInspectable
+    open var dividerNormalColor = Color.grey.lighten2 {
         didSet {
             guard !isEditing else {
                 return
@@ -156,63 +167,79 @@ open class TextField: UITextField {
             dividerColor = dividerNormalColor
         }
     }
-	
-	/// Divider active color.
-	@IBInspectable
+    
+    /// Divider active color.
+    @IBInspectable
     open var dividerActiveColor = Color.blue.base {
-		didSet {
+        didSet {
             guard isEditing else {
                 return
             }
             
             dividerColor = dividerActiveColor
-		}
-	}
-	
-	/// The placeholderLabel font value.
-	@IBInspectable
+        }
+    }
+    
+    /// The placeholderLabel font value.
+    @IBInspectable
     open override var font: UIFont? {
-		didSet {
-			placeholderLabel.font = font
-		}
-	}
- 
-	/// The placeholderLabel text value.
-	@IBInspectable
+        didSet {
+            placeholderLabel.font = font
+        }
+    }
+    
+    /// The placeholderLabel text value.
+    @IBInspectable
     open override var placeholder: String? {
-		get {
-			return placeholderLabel.text
-		}
-		set(value) {
-			placeholderLabel.text = value
+        get {
+            return placeholderLabel.text
+        }
+        set(value) {
+            if isEditing && isPlaceholderUppercasedWhenEditing {
+                placeholderLabel.text = value?.uppercased()
+            } else {
+                placeholderLabel.text = value
+            }
             layoutSubviews()
-		}
-	}
-	
-	/// The placeholder UILabel.
-	@IBInspectable
+        }
+    }
+    
+    /// The placeholder UILabel.
+    @IBInspectable
     open let placeholderLabel = UILabel()
-	
-	/// Placeholder normal text
-	@IBInspectable
+    
+    /// Placeholder normal text
+    @IBInspectable
     open var placeholderNormalColor = Color.darkText.others {
-		didSet {
+        didSet {
             updatePlaceholderLabelColor()
-		}
-	}
-	
-	/// Placeholder active text
-	@IBInspectable
+        }
+    }
+    
+    /// Placeholder active text
+    @IBInspectable
     open var placeholderActiveColor = Color.blue.base {
-		didSet {
+        didSet {
             updatePlaceholderLabelColor()
-		}
-	}
+        }
+    }
 	
 	/// This property adds a padding to placeholder y position animation
 	@IBInspectable
     open var placeholderVerticalOffset: CGFloat = 0
+  
+    /// This property adds a padding to placeholder y position animation
+    @IBInspectable
+    open var placeholderHorizontalOffset: CGFloat = 0
 	
+    /// The scale of the active placeholder in relation to the inactive
+    @IBInspectable
+    open var placeholderActiveScale: CGFloat = 0.75 {
+        didSet {
+            layoutPlaceholderLabel()
+        }
+    }
+  
 	/// The detailLabel UILabel that is displayed.
 	@IBInspectable
     open let detailLabel = UILabel()
@@ -220,53 +247,53 @@ open class TextField: UITextField {
 	/// The detailLabel text value.
 	@IBInspectable
     open var detail: String? {
-		get {
-			return detailLabel.text
-		}
-		set(value) {
-			detailLabel.text = value
+        get {
+            return detailLabel.text
+        }
+        set(value) {
+            detailLabel.text = value
             layoutSubviews()
-		}
-	}
-	
-	/// Detail text
-	@IBInspectable
-    open var detailColor = Color.darkText.others {
-		didSet {
-            updateDetailLabelColor()
-		}
-	}
+        }
+    }
     
-	/// Vertical distance for the detailLabel from the divider.
-	@IBInspectable
+    /// Detail text
+    @IBInspectable
+    open var detailColor = Color.darkText.others {
+        didSet {
+            updateDetailLabelColor()
+        }
+    }
+    
+    /// Vertical distance for the detailLabel from the divider.
+    @IBInspectable
     open var detailVerticalOffset: CGFloat = 8 {
-		didSet {
-			layoutDetailLabel()
-		}
-	}
-	
-	/// Handles the textAlignment of the placeholderLabel.
-	open override var textAlignment: NSTextAlignment {
-		get {
-			return super.textAlignment
-		}
-		set(value) {
-			super.textAlignment = value
-			placeholderLabel.textAlignment = value
-			detailLabel.textAlignment = value
-		}
-	}
-	
+        didSet {
+            layoutDetailLabel()
+        }
+    }
+    
+    /// Handles the textAlignment of the placeholderLabel.
+    open override var textAlignment: NSTextAlignment {
+        get {
+            return super.textAlignment
+        }
+        set(value) {
+            super.textAlignment = value
+            placeholderLabel.textAlignment = value
+            detailLabel.textAlignment = value
+        }
+    }
+    
     /// A reference to the clearIconButton.
     open fileprivate(set) var clearIconButton: IconButton?
     
-	/// Enables the clearIconButton.
-	@IBInspectable
+    /// Enables the clearIconButton.
+    @IBInspectable
     open var isClearIconButtonEnabled: Bool {
-		get {
-			return nil != clearIconButton
-		}
-		set(value) {
+        get {
+            return nil != clearIconButton
+        }
+        set(value) {
             guard value else {
                 clearIconButton?.removeTarget(self, action: #selector(handleClearIconButton), for: .touchUpInside)
                 clearIconButton = nil
@@ -283,36 +310,36 @@ open class TextField: UITextField {
             clearButtonMode = .never
             rightViewMode = .whileEditing
             rightView = clearIconButton
-            isClearIconButtonAutoHandled = isClearIconButtonAutoHandled ? true : false
+            isClearIconButtonAutoHandled = { isClearIconButtonAutoHandled }()
             
             layoutSubviews()
-		}
-	}
-	
-	/// Enables the automatic handling of the clearIconButton.
-	@IBInspectable
+        }
+    }
+    
+    /// Enables the automatic handling of the clearIconButton.
+    @IBInspectable
     open var isClearIconButtonAutoHandled = true {
-		didSet {
-			clearIconButton?.removeTarget(self, action: #selector(handleClearIconButton), for: .touchUpInside)
-			
+        didSet {
+            clearIconButton?.removeTarget(self, action: #selector(handleClearIconButton), for: .touchUpInside)
+            
             guard isClearIconButtonAutoHandled else {
                 return
-			}
+            }
             
             clearIconButton?.addTarget(self, action: #selector(handleClearIconButton), for: .touchUpInside)
-		}
-	}
+        }
+    }
     
     /// A reference to the visibilityIconButton.
     open fileprivate(set) var visibilityIconButton: IconButton?
-	
-	/// Enables the visibilityIconButton.
-	@IBInspectable
+    
+    /// Enables the visibilityIconButton.
+    @IBInspectable
     open var isVisibilityIconButtonEnabled: Bool {
-		get {
-			return nil != visibilityIconButton
-		}
-		set(value) {
+        get {
+            return nil != visibilityIconButton
+        }
+        set(value) {
             guard value else {
                 visibilityIconButton?.removeTarget(self, action: #selector(handleVisibilityIconButton), for: .touchUpInside)
                 visibilityIconButton = nil
@@ -330,84 +357,60 @@ open class TextField: UITextField {
             clearButtonMode = .never
             rightViewMode = .whileEditing
             rightView = visibilityIconButton
-            isVisibilityIconButtonAutoHandled = isVisibilityIconButtonAutoHandled ? true : false
+            isVisibilityIconButtonAutoHandled = { isVisibilityIconButtonAutoHandled }()
             
             layoutSubviews()
-		}
-	}
+        }
+    }
 	
 	/// Enables the automatic handling of the visibilityIconButton.
 	@IBInspectable
-    open var isVisibilityIconButtonAutoHandled: Bool = true {
+    open var isVisibilityIconButtonAutoHandled = true {
 		didSet {
 			visibilityIconButton?.removeTarget(self, action: #selector(handleVisibilityIconButton), for: .touchUpInside)
-			
             guard isVisibilityIconButtonAutoHandled else {
                 return
-			}
+            }
             
             visibilityIconButton?.addTarget(self, action: #selector(handleVisibilityIconButton), for: .touchUpInside)
-		}
-	}
-	
+        }
+    }
+    
+    @IBInspectable
+    open var isPlaceholderUppercasedWhenEditing = false {
+        didSet {
+            updatePlaceholderTextToActiveState()
+        }
+    }
+    
     /**
      An initializer that initializes the object with a NSCoder object.
      - Parameter aDecoder: A NSCoder instance.
      */
-	public required init?(coder aDecoder: NSCoder) {
-		super.init(coder: aDecoder)
-		prepare()
-	}
-	
-	/**
+    public required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        prepare()
+    }
+    
+    /**
      An initializer that initializes the object with a CGRect object.
      If AutoLayout is used, it is better to initilize the instance
      using the init() initializer.
      - Parameter frame: A CGRect instance.
      */
-	public override init(frame: CGRect) {
-		super.init(frame: frame)
-		prepare()
-	}
-	
-	/// A convenience initializer.
-	public convenience init() {
-		self.init(frame: .zero)
-	}
-	
-	open override func layoutSubviews() {
-		super.layoutSubviews()
-        layoutShape()
-        reload()
-	}
-	
-    open override func becomeFirstResponder() -> Bool {
-        layoutSubviews()
-        return super.becomeFirstResponder()
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        prepare()
     }
     
-	/**
-     Prepares the view instance when intialized. When subclassing,
-     it is recommended to override the prepare method
-     to initialize property values and other setup operations.
-     The super.prepare method should always be called immediately
-     when subclassing.
-     */
-	open func prepare() {
-		clipsToBounds = false
-		borderStyle = .none
-		backgroundColor = nil
-		contentScaleFactor = Screen.scale
-        
-        prepareDivider()
-		preparePlaceholderLabel()
-		prepareDetailLabel()
-		prepareTargetHandlers()
-        prepareTextAlignment()
-	}
+    /// A convenience initializer.
+    public convenience init() {
+        self.init(frame: .zero)
+    }
     
-	/// Ensures that the components are sized correctly.
-	open func reload() {
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        layoutShape()
         layoutPlaceholderLabel()
         layoutDetailLabel()
         layoutButton(button: clearIconButton)
@@ -415,23 +418,64 @@ open class TextField: UITextField {
         layoutDivider()
         layoutLeftView()
     }
+  
+    open override func becomeFirstResponder() -> Bool {
+        layoutSubviews()
+        return super.becomeFirstResponder()
+    }
+    
+    /// EdgeInsets for text.
+    open var textInset: CGFloat = 0
+    
+    open override func textRect(forBounds bounds: CGRect) -> CGRect {
+        var b = super.textRect(forBounds: bounds)
+        b.origin.x += textInset
+        b.size.width -= textInset
+        return b
+    }
+    
+    open override func editingRect(forBounds bounds: CGRect) -> CGRect {
+        return textRect(forBounds: bounds)
+    }
+    
+    /**
+     Prepares the view instance when intialized. When subclassing,
+     it is recommended to override the prepare method
+     to initialize property values and other setup operations.
+     The super.prepare method should always be called immediately
+     when subclassing.
+     */
+    open func prepare() {
+        clipsToBounds = false
+        borderStyle = .none
+        backgroundColor = nil
+        contentScaleFactor = Screen.scale
+        font = RobotoFont.regular(with: 16)
+        textColor = Color.darkText.primary
+        
+        prepareDivider()
+        preparePlaceholderLabel()
+        prepareDetailLabel()
+        prepareTargetHandlers()
+        prepareTextAlignment()
+    }
 }
 
-extension TextField {
+fileprivate extension TextField {
     /// Prepares the divider.
-    fileprivate func prepareDivider() {
+    func prepareDivider() {
         dividerColor = dividerNormalColor
     }
     
     /// Prepares the placeholderLabel.
-    fileprivate func preparePlaceholderLabel() {
-        font = RobotoFont.regular(with: 16)
+    func preparePlaceholderLabel() {
         placeholderNormalColor = Color.darkText.others
+        placeholderLabel.backgroundColor = .clear
         addSubview(placeholderLabel)
     }
     
     /// Prepares the detailLabel.
-    fileprivate func prepareDetailLabel() {
+    func prepareDetailLabel() {
         detailLabel.font = RobotoFont.regular(with: 12)
         detailLabel.numberOfLines = 0
         detailColor = Color.darkText.others
@@ -439,63 +483,90 @@ extension TextField {
     }
     
     /// Prepares the leftView.
-    fileprivate func prepareLeftView() {
+    func prepareLeftView() {
         leftView?.contentMode = .left
+        leftViewMode = .always
         updateLeftViewColor()
     }
     
     /// Prepares the target handlers.
-    fileprivate func prepareTargetHandlers() {
+    func prepareTargetHandlers() {
         addTarget(self, action: #selector(handleEditingDidBegin), for: .editingDidBegin)
         addTarget(self, action: #selector(handleEditingChanged), for: .editingChanged)
         addTarget(self, action: #selector(handleEditingDidEnd), for: .editingDidEnd)
     }
     
     /// Prepares the textAlignment.
-    fileprivate func prepareTextAlignment() {
+    func prepareTextAlignment() {
         textAlignment = .rightToLeft == Application.userInterfaceLayoutDirection ? .right : .left
     }
 }
 
-extension TextField {
+fileprivate extension TextField {
     /// Updates the leftView tint color.
-    fileprivate func updateLeftViewColor() {
+    func updateLeftViewColor() {
         leftView?.tintColor = isEditing ? leftViewActiveColor : leftViewNormalColor
     }
     
     /// Updates the placeholderLabel text color.
-    fileprivate func updatePlaceholderLabelColor() {
+    func updatePlaceholderLabelColor() {
         tintColor = placeholderActiveColor
         placeholderLabel.textColor = isEditing ? placeholderActiveColor : placeholderNormalColor
     }
     
+    /// Update the placeholder text to the active state.
+    func updatePlaceholderTextToActiveState() {
+        guard isPlaceholderUppercasedWhenEditing else {
+            return
+        }
+        
+        guard isEditing || !isEmpty else {
+            return
+        }
+        
+        placeholderLabel.text = placeholderLabel.text?.uppercased()
+    }
+    
+    /// Update the placeholder text to the normal state.
+    func updatePlaceholderTextToNormalState() {
+        guard isPlaceholderUppercasedWhenEditing else {
+            return
+        }
+        
+        guard isEmpty else {
+            return
+        }
+        
+        placeholderLabel.text = placeholderLabel.text?.capitalized
+    }
+    
     /// Updates the detailLabel text color.
-    fileprivate func updateDetailLabelColor() {
+    func updateDetailLabelColor() {
         detailLabel.textColor = detailColor
     }
 }
 
-extension TextField {
+fileprivate extension TextField {
     /// Layout the placeholderLabel.
-    fileprivate func layoutPlaceholderLabel() {
-        let w = leftViewWidth
+    func layoutPlaceholderLabel() {
+        let w = leftViewWidth + textInset
         let h = 0 == height ? intrinsicContentSize.height : height
         
         placeholderLabel.transform = CGAffineTransform.identity
         
         guard isEditing || !isEmpty || !isPlaceholderAnimated else {
-            placeholderLabel.frame = CGRect(x: w, y: 0, width: width - w, height: h)
+            placeholderLabel.frame = CGRect(x: w, y: 0, width: width - leftViewWidth - 2 * textInset, height: h)
             return
         }
         
-        placeholderLabel.frame = CGRect(x: w, y: 0, width: width - w, height: h)
-        placeholderLabel.transform = CGAffineTransform(scaleX: 0.75, y: 0.75)
+        placeholderLabel.frame = CGRect(x: w, y: 0, width: width - leftViewWidth - 2 * textInset, height: h)
+        placeholderLabel.transform = CGAffineTransform(scaleX: placeholderActiveScale, y: placeholderActiveScale)
         
         switch textAlignment {
         case .left, .natural:
-            placeholderLabel.x = w
+            placeholderLabel.x = w + placeholderHorizontalOffset
         case .right:
-            placeholderLabel.x = width - placeholderLabel.width
+            placeholderLabel.x = width - placeholderLabel.width - textInset + placeholderHorizontalOffset
         default:break
         }
         
@@ -503,26 +574,21 @@ extension TextField {
     }
     
     /// Layout the detailLabel.
-    fileprivate func layoutDetailLabel() {
+    func layoutDetailLabel() {
         let c = dividerContentEdgeInsets
-        detailLabel.height = detailLabel.sizeThatFits(CGSize(width: width, height: CGFloat.greatestFiniteMagnitude)).height
+        detailLabel.height = detailLabel.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude)).height
         detailLabel.x = c.left
         detailLabel.y = height + detailVerticalOffset
         detailLabel.width = width - c.left - c.right
     }
     
     /// Layout the a button.
-    fileprivate func layoutButton(button: UIButton?) {
+    func layoutButton(button: UIButton?) {
         button?.frame = CGRect(x: width - height, y: 0, width: height, height: height)
     }
     
-    /// Layout the divider.
-    fileprivate func layoutDivider() {
-        divider.reload()
-    }
-    
     /// Layout the leftView.
-    fileprivate func layoutLeftView() {
+    func layoutLeftView() {
         guard let v = leftView else {
             return
         }
@@ -533,25 +599,24 @@ extension TextField {
     }
 }
 
-extension TextField {
+fileprivate extension TextField {
     /// Handles the text editing did begin state.
     @objc
-    fileprivate func handleEditingDidBegin() {
+    func handleEditingDidBegin() {
         leftViewEditingBeginAnimation()
         placeholderEditingDidBeginAnimation()
         dividerEditingDidBeginAnimation()
-        
     }
     
     // Live updates the textField text.
     @objc
-    fileprivate func handleEditingChanged(textField: UITextField) {
+    func handleEditingChanged(textField: UITextField) {
         (delegate as? TextFieldDelegate)?.textField?(textField: self, didChange: textField.text)
     }
     
     /// Handles the text editing did end state.
     @objc
-    fileprivate func handleEditingDidEnd() {
+    func handleEditingDidEnd() {
         leftViewEditingEndAnimation()
         placeholderEditingDidEndAnimation()
         dividerEditingDidEndAnimation()
@@ -559,7 +624,7 @@ extension TextField {
     
     /// Handles the clearIconButton TouchUpInside event.
     @objc
-    fileprivate func handleClearIconButton() {
+    func handleClearIconButton() {
         guard nil == delegate?.textFieldShouldClear || true == delegate?.textFieldShouldClear?(self) else {
             return
         }
@@ -575,7 +640,7 @@ extension TextField {
     
     /// Handles the visibilityIconButton TouchUpInside event.
     @objc
-    fileprivate func handleVisibilityIconButton() {
+    func handleVisibilityIconButton() {
         isSecureTextEntry = !isSecureTextEntry
         
         if !isSecureTextEntry {
@@ -620,10 +685,12 @@ extension TextField {
         updatePlaceholderLabelColor()
         
         guard isPlaceholderAnimated else {
+            updatePlaceholderTextToActiveState()
             return
         }
         
         guard isEmpty else {
+            updatePlaceholderTextToActiveState()
             return
         }
         
@@ -632,13 +699,15 @@ extension TextField {
                 return
             }
             
-            s.placeholderLabel.transform = CGAffineTransform(scaleX: 0.75, y: 0.75)
+            s.placeholderLabel.transform = CGAffineTransform(scaleX: s.placeholderActiveScale, y: s.placeholderActiveScale)
             
+            s.updatePlaceholderTextToActiveState()
+                                                        
             switch s.textAlignment {
             case .left, .natural:
-                s.placeholderLabel.x = s.leftViewWidth
+                s.placeholderLabel.x = s.leftViewWidth + s.textInset + s.placeholderHorizontalOffset
             case .right:
-                s.placeholderLabel.x = s.width - s.placeholderLabel.width
+                s.placeholderLabel.x = s.width - s.placeholderLabel.width - s.textInset + s.placeholderHorizontalOffset
             default:break
             }
             
@@ -654,6 +723,7 @@ extension TextField {
         }
         
         updatePlaceholderLabelColor()
+        updatePlaceholderTextToNormalState()
         
         guard isPlaceholderAnimated else {
             return
@@ -669,7 +739,7 @@ extension TextField {
             }
             
             s.placeholderLabel.transform = CGAffineTransform.identity
-            s.placeholderLabel.x = s.leftViewWidth
+            s.placeholderLabel.x = s.leftViewWidth + s.textInset
             s.placeholderLabel.y = 0
         })
     }

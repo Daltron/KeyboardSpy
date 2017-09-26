@@ -9,14 +9,12 @@
 
 import UIKit
 import KeyboardSpy
-import SnapKit
 import Material
+import SnapKit
 
-class KeyboardSpyView: UIView, KeyboardSpyAgent {
-
-    internal var keyboardEventsToSpyOn: [KeyboardSpyEvent] = [.willShow, .willHide]
+class KeyboardSpyView: UIView {
     
-    private var card: Card!
+    fileprivate var card: Card!
     
     init() {
         super.init(frame: .zero)
@@ -54,8 +52,15 @@ class KeyboardSpyView: UIView, KeyboardSpyAgent {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+}
+
+extension KeyboardSpyView: KeyboardSpyAgent {
     
-    func keyboardSpyEventProcessed(event: KeyboardSpyEvent, keyboardInfo: KeyboardSpyInfo) {
+    internal var keyboardEventsToSpyOn: [KeyboardSpyEvent] {
+        return [.willShow, .willHide]
+    }
+    
+    internal func keyboardSpyEventProcessed(event: KeyboardSpyEvent, keyboardInfo: KeyboardSpyInfo) {
         
         if event == .willShow {
             UIView.animate(withDuration: keyboardInfo.animationDuration, animations: {

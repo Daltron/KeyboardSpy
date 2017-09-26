@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,18 +148,11 @@ open class SearchBar: Bar {
             return
         }
         
-        textField.frame = contentView.bounds
+        layoutTextField()
         layoutLeftView()
         layoutClearButton()
     }
     
-	/**
-     Prepares the view instance when intialized. When subclassing,
-     it is recommended to override the prepare method
-     to initialize property values and other setup operations.
-     The super.prepare method should always be called immediately
-     when subclassing.
-     */
 	open override func prepare() {
 		super.prepare()
         prepareTextField()
@@ -168,10 +161,9 @@ open class SearchBar: Bar {
 }
 
 extension SearchBar {
-    /// Layout the clearButton.
-    open func layoutClearButton() {
-        let h = textField.frame.height
-        clearButton.frame = CGRect(x: textField.frame.width - h - 4, y: 4, width: h, height: h - 8)
+    /// Layout the textField.
+    open func layoutTextField() {
+        textField.frame = contentView.bounds
     }
     
     /// Layout the leftView.
@@ -185,12 +177,18 @@ extension SearchBar {
         
         (v as? UIImageView)?.contentMode = .scaleAspectFit
     }
+    
+    /// Layout the clearButton.
+    open func layoutClearButton() {
+        let h = textField.frame.height
+        clearButton.frame = CGRect(x: textField.frame.width - h - 4, y: 4, width: h, height: h - 8)
+    }
 }
 
-extension SearchBar {
+fileprivate extension SearchBar {
     /// Clears the textField text.
     @objc
-    fileprivate func handleClearButton() {
+    func handleClearButton() {
         guard nil == textField.delegate?.textFieldShouldClear || true == textField.delegate?.textFieldShouldClear?(textField) else {
             return
         }
@@ -206,27 +204,27 @@ extension SearchBar {
     
     // Live updates the search results.
     @objc
-    fileprivate func handleEditingChanged(textField: UITextField) {
+    func handleEditingChanged(textField: UITextField) {
         delegate?.searchBar?(searchBar: self, didChange: textField, with: textField.text)
     }
 }
 
-extension SearchBar {
+fileprivate extension SearchBar {
     /// Prepares the textField.
-    fileprivate func prepareTextField() {
+    func prepareTextField() {
         textField.contentScaleFactor = Screen.scale
         textField.font = RobotoFont.regular(with: 17)
         textField.backgroundColor = Color.clear
         textField.clearButtonMode = .whileEditing
+        textField.addTarget(self, action: #selector(handleEditingChanged(textField:)), for: .editingChanged)
         tintColor = placeholderColor
         textColor = Color.darkText.primary
         placeholder = "Search"
         contentView.addSubview(textField)
-        textField.addTarget(self, action: #selector(handleEditingChanged(textField:)), for: .editingChanged)
     }
     
     /// Prepares the clearButton.
-    fileprivate func prepareClearButton() {
+    func prepareClearButton() {
         clearButton = IconButton(image: Icon.cm.close, tintColor: placeholderColor)
         clearButton.contentEdgeInsets = .zero
         isClearButtonAutoHandleEnabled = true

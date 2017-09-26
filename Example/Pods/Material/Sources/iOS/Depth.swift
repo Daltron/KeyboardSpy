@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
+ * Copyright (C) 2015 - 2017, Daniel Dahan and CosmicMind, Inc. <http://cosmicmind.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,11 @@ public struct Depth {
     /// Radius.
     public var radius: CGFloat
     
+    /// A tuple of raw values.
+    public var rawValue: (CGSize, Float, CGFloat) {
+        return (offset.asSize, opacity, radius)
+    }
+    
     /// Preset.
     public var preset = DepthPreset.none {
         didSet {
@@ -62,9 +67,9 @@ public struct Depth {
     
     /**
      Initializer that takes in an offset, opacity, and radius.
-     - Parameter offset: UIOffset.
-     - Parameter opacity: Float.
-     - Parameter radius: CGFloat.
+     - Parameter offset: A UIOffset.
+     - Parameter opacity: A Float.
+     - Parameter radius: A CGFloat.
      */
     public init(offset: Offset = .zero, opacity: Float = 0, radius: CGFloat = 0) {
         self.offset = offset
